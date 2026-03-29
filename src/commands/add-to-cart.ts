@@ -1,7 +1,8 @@
 import { loadConfig } from "../config";
 import { addToCart } from "../services/cart";
 import { search } from "../services/search";
-import { withSpinner, ok, dim, bold } from "../ui";
+import { getProductToppings } from "../services/product";
+import { withSpinner, ok, dim, bold, warn } from "../ui";
 
 const storeId = parseInt(process.argv[2]);
 const productId = process.argv[3];
@@ -34,6 +35,20 @@ for (const store of searchResult.stores) {
   }
 }
 
+// Check for required toppings
+const toppingData = await withSpinner("Checking toppings...", () => getProductToppings(storeId, parseInt(productId), config));
+const requiredGroups = toppingData.categories.filter((cat: any) => cat.min_toppings_for_categories > 0);
+let hasWarning = false;
+
+if (requiredGroups.length && !toppingsArg) {
+  console.log(`\n${warn("⚠️  This product has required toppings:")}`);
+  for (const group of requiredGroups) {
+    console.log(`    • ${group.description} (required - pick ${group.min_toppings_for_categories})`);
+  }
+  console.log(`${dim("Run: rappi product")} ${storeId} ${productId} ${dim("to see options")}\n`);
+  hasWarning = true;
+}
+
 const result = await withSpinner("Adding to cart...", () =>
   addToCart(
     "restaurant",
@@ -43,6 +58,11 @@ const result = await withSpinner("Adding to cart...", () =>
 );
 
 console.log(`\n${ok(`Added ${bold(productName)} to cart`)}\n`);
+
+if (hasWarning && !toppingsArg) {
+  console.log(`${warn("⚠️  Note: Product added without required toppings selected")}`);
+  console.log(`${dim("Add toppings with: rappi add-to-cart")} ${storeId} ${productId} "${productName}" 1 "<topping_ids>"\n`);
+}
 
 for (const store of result.stores) {
   const status = store.is_open ? "" : ` ${dim("(CLOSED)")}`;

@@ -37,6 +37,16 @@ try {
   console.log(`\n${ok("Order placed!")}`);
   console.log(`\n  ${dim(JSON.stringify(result, null, 2))}\n`);
 } catch (err: any) {
-  console.log(`\n${fail(`Failed to place order: ${err.message}`)}\n`);
+  const message = err.message;
+
+  // Check for topping-related errors
+  if (message.includes("invalid_toppings")) {
+    console.log(`\n${fail("Cannot place order: Missing or invalid toppings")}`);
+    console.log(`${warn("Some products in your cart require toppings that are missing or unavailable.")}`);
+    console.log(`${dim("Run: rappi cart")} ${dim("to see items")}`);
+    console.log(`${dim("Run: rappi product <store_id> <product_id>")} ${dim("to check required toppings")}\n`);
+  } else {
+    console.log(`\n${fail(`Failed to place order: ${message}`)}\n`);
+  }
   process.exit(1);
 }

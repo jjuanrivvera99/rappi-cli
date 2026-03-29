@@ -27,8 +27,14 @@ export async function post<T>(
     headers: { ...buildHeaders(config), "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!res.ok)
-    throw new Error(`POST ${path} → ${res.status} ${res.statusText}`);
+  if (!res.ok) {
+    let errorBody = "";
+    try {
+      errorBody = await res.text();
+    } catch {}
+    const details = errorBody ? ` (${errorBody.substring(0, 100)})` : "";
+    throw new Error(`POST ${path} → ${res.status} ${res.statusText}${details}`);
+  }
   return res.json();
 }
 

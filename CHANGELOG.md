@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.4
+
+### Bug Fixes
+
+- **Checkout error fixed**: `place-order` was sending empty payload to checkout endpoint. Now correctly sends `return_key` from checkout detail.
+- **Topping validation**: `add-to-cart` now checks for required toppings and warns users before adding products without them.
+- **Better error messages**: When checkout fails due to missing toppings, shows helpful guidance: "Run `rappi product <store_id> <product_id>` to check required toppings".
+- **HTTP error logging**: Response body (first 100 chars) now included in error messages for better debugging.
+
 ## 0.0.3
 
 ### Features

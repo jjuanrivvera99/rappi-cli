@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { loadConfig } from "../config";
+import { imageUrl } from "../formatters";
 import { getUser, isPrime } from "../services/auth";
 import { getAddresses, setActiveAddress, reverseGeocode } from "../services/address";
 import { search } from "../services/search";
@@ -89,14 +90,14 @@ server.tool(
       store_id: s.store_id,
       store_name: s.store_name,
       store_type: s.store_type,
-      logo: s.logo,
+      logo: s.logo ? imageUrl(s.logo, "restaurants_logo") : undefined,
       eta: s.eta,
       shipping: s.shipping_cost,
       products: s.products.slice(0, 3).map((p) => ({
         product_id: p.product_id,
         name: p.name,
         price: p.price,
-        image: p.image,
+        image: p.image ? imageUrl(p.image) : undefined,
         has_toppings: p.has_toppings,
         in_stock: p.in_stock,
       })),
@@ -117,7 +118,7 @@ server.tool(
     const stores = catalog.stores.map((s) => ({
       store_id: s.store_id,
       name: s.name,
-      logo: s.logo,
+      logo: s.logo ? imageUrl(s.logo, "restaurants_logo") : undefined,
       eta: s.eta,
       score: s.score,
       shipping: s.shipping_cost,
@@ -161,7 +162,7 @@ server.tool(
         id: t.id,
         name: t.description,
         price: t.price,
-        image: t.image,
+        image: t.image ? imageUrl(t.image) : undefined,
         available: t.is_available,
       })),
     }));

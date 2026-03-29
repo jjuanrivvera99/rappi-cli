@@ -1,4 +1,5 @@
 export const BASE_URL = "https://services.grability.rappi.com";
+export const IMAGES_BASE_URL = "https://images.rappi.com";
 export const DEFAULT_STORE_TYPE = "restaurant";
 export const DEFAULT_COORDS = { lat: 4.624335, lng: -74.063644 } as const;
 export const CONFIG_FILENAME = ".rappi-config.json";

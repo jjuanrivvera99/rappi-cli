@@ -49,6 +49,7 @@ rappi search "crepe de pollo"  # Search for food
 | Command | Description |
 |---------|-------------|
 | `rappi add-to-cart <store_id> <product_id> [name] [qty] [topping_ids]` | Adds a product to the shopping cart. `topping_ids` is a comma-separated list of topping IDs (e.g., `"1720411,1720415"`). |
+| `rappi remove-from-cart <product_id>` | Removes a product from the cart by its compound ID (e.g., `"900006505_3522980"`). Get IDs from `rappi cart`. |
 | `rappi cart` | Shows current cart: stores, products, quantities, prices, shipping charges, and totals. |
 | `rappi checkout [store_type]` | Previews the order: recalculates totals, shows checkout summary with all charges. Default store_type: `restaurant`. |
 | `rappi place-order [store_type]` | Places the order! Validates cart first — fails if store is closed or products unavailable. |
@@ -107,7 +108,7 @@ server.ts            → API server entry point
 
 The CLI includes an MCP server (`src/mcp/index.ts`) that exposes 13 tools for Claude to call natively. When the MCP server is configured, Claude can search, order, and track without running CLI commands.
 
-**Tools**: `whoami`, `search`, `list_restaurants`, `get_store`, `get_product_options`, `add_to_cart`, `get_cart`, `checkout_preview`, `set_tip`, `place_order`, `track_orders`, `list_addresses`, `set_address`
+**Tools**: `whoami`, `search`, `list_restaurants`, `get_store`, `get_product_options`, `add_to_cart`, `remove_from_cart`, `get_cart`, `checkout_preview`, `set_tip`, `place_order`, `track_orders`, `list_addresses`, `set_address`
 
 **Setup for Claude Code** — add `.mcp.json` to project root:
 ```json

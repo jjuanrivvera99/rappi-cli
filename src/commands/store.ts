@@ -18,6 +18,8 @@ console.log(`Type:     ${store.store_type?.description || store.store_type?.id}`
 console.log(`Status:   ${store.status?.status}`);
 console.log(`Cooking:  ${store.min_cooking_time}-${store.max_cooking_time} min`);
 console.log(`Brand:    ${store.brand?.name}`);
+if (store.logo) console.log(`Logo:     ${store.logo}`);
+if (store.background) console.log(`Banner:   ${store.background}`);
 
 if (store.delivery_methods?.length) {
   console.log(`Delivery: ${store.delivery_methods.map((d: any) => d.type).join(", ")}`);
@@ -35,6 +37,9 @@ if (store.corridors?.length) {
         console.log(`  [${p.id}] ${p.name} — ${price}${toppings}${stock}`);
         if (p.description) {
           console.log(`         ${p.description.slice(0, 80)}`);
+        }
+        if (p.image) {
+          console.log(`         Image: ${p.image}`);
         }
       }
     }

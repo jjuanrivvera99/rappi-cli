@@ -23,6 +23,7 @@ for (const store of result.stores) {
     : "Free";
   console.log(`  [${store.store_id}] ${store.store_name}`);
   console.log(`    Type: ${store.store_type}  ETA: ${store.eta}  Shipping: ${shipping}`);
+  if (store.logo) console.log(`    Logo: ${store.logo}`);
 
   if (store.products?.length) {
     for (const p of store.products.slice(0, 3)) {
@@ -30,6 +31,7 @@ for (const store of result.stores) {
       const stock = p.in_stock ? "" : " (OUT OF STOCK)";
       const discount = p.discount > 0 ? ` -${p.discount}%` : "";
       console.log(`    • [${p.product_id}] ${p.name} — ${price}${discount}${stock}`);
+      if (p.image) console.log(`      Image: ${p.image}`);
     }
   }
   console.log("");

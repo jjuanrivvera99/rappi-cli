@@ -30,6 +30,7 @@ for (const cat of data.categories) {
     const price = t.price > 0 ? ` +$${t.price.toLocaleString("es-CO")}` : "";
     const available = t.is_available ? "" : " (unavailable)";
     console.log(`    [${t.id}] ${t.description}${price}${available}`);
+    if (t.image) console.log(`           Image: ${t.image}`);
   }
   console.log("");
 }

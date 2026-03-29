@@ -20,6 +20,7 @@ for (const store of catalog.stores) {
   const available = store.is_available ? "" : " (CLOSED)";
   console.log(`  [${store.store_id}] ${store.name}${available}`);
   console.log(`    ETA: ${store.eta}  Shipping: ${shipping}  ${rating}`);
+  if (store.logo) console.log(`    Logo: ${store.logo}`);
   console.log("");
 }
 

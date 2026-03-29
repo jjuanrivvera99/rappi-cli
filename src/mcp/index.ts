@@ -8,7 +8,7 @@ import { getAddresses, setActiveAddress, reverseGeocode } from "../services/addr
 import { search } from "../services/search";
 import { getStoreDetail, getRestaurantCatalog } from "../services/store";
 import { getProductToppings } from "../services/product";
-import { addToCart, getCarts, recalculateCart } from "../services/cart";
+import { addToCart, removeFromCart, getCarts, recalculateCart } from "../services/cart";
 import { getCheckoutDetail, setTip } from "../services/checkout";
 import { placeOrder, getOrders } from "../services/order";
 import { DEFAULT_STORE_TYPE } from "../constants";
@@ -89,12 +89,14 @@ server.tool(
       store_id: s.store_id,
       store_name: s.store_name,
       store_type: s.store_type,
+      logo: s.logo,
       eta: s.eta,
       shipping: s.shipping_cost,
       products: s.products.slice(0, 3).map((p) => ({
         product_id: p.product_id,
         name: p.name,
         price: p.price,
+        image: p.image,
         has_toppings: p.has_toppings,
         in_stock: p.in_stock,
       })),
@@ -115,6 +117,7 @@ server.tool(
     const stores = catalog.stores.map((s) => ({
       store_id: s.store_id,
       name: s.name,
+      logo: s.logo,
       eta: s.eta,
       score: s.score,
       shipping: s.shipping_cost,
@@ -158,6 +161,7 @@ server.tool(
         id: t.id,
         name: t.description,
         price: t.price,
+        image: t.image,
         available: t.is_available,
       })),
     }));
@@ -192,6 +196,31 @@ server.tool(
         text: store
           ? `Added ${name} x${quantity} to cart\nStore: ${store.name}\nTotal: $${store.total.toLocaleString("es-CO")}`
           : "Added to cart",
+      }],
+    };
+  }
+);
+
+server.tool(
+  "remove_from_cart",
+  "Remove a product from the shopping cart by its compound ID (e.g. '900006505_3522980')",
+  {
+    product_id: z.string().describe("Compound product ID from get_cart (e.g. '900006505_3522980')"),
+    store_type: z.string().optional().default(DEFAULT_STORE_TYPE),
+  },
+  async ({ product_id, store_type }) => {
+    const config = await loadConfig();
+    await removeFromCart(store_type, product_id, config);
+    const carts = await getCarts(config);
+    const remaining = carts.flatMap((c) =>
+      c.stores.flatMap((s) => s.products.map((p) => `${p.name} x${p.units}`))
+    );
+    return {
+      content: [{
+        type: "text",
+        text: remaining.length
+          ? `Removed. Remaining in cart:\n${remaining.join("\n")}`
+          : "Removed. Cart is now empty.",
       }],
     };
   }

@@ -6,13 +6,27 @@
 ██   ██ ██   ██ ██      ██      ███████         ███████ ███████ ███████
 ```
 
+[![npm version](https://img.shields.io/npm/v/rappi-cli.svg)](https://www.npmjs.com/package/rappi-cli)
+[![GitHub](https://img.shields.io/github/stars/camilocbarrera/rappi-cli.svg?style=social)](https://github.com/camilocbarrera/rappi-cli)
+
 Order from [Rappi](https://www.rappi.com.co/) directly from the terminal, via REST API, or as an MCP server for Claude. Built with Bun, TypeScript, Zod, and Hono.
+
+## Install
+
+```bash
+# From npm (requires Bun)
+bun add -g rappi-cli
+
+# Or clone and link
+git clone https://github.com/camilocbarrera/rappi-cli.git
+cd rappi-cli
+bun install
+bun link
+```
 
 ## Setup
 
 ```bash
-bun install
-bun link          # Makes `rappi` available globally
 rappi login       # Opens browser — log in with your Rappi account
 ```
 

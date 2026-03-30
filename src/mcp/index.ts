@@ -16,7 +16,16 @@ import { DEFAULT_STORE_TYPE } from "../constants";
 
 const server = new McpServer({
   name: "rappi",
-  version: "1.0.0",
+  version: "0.0.5",
+  description: [
+    "Order food and groceries from Rappi. All prices are in COP (Colombian Pesos).",
+    "",
+    "Order flow: search → get_product_options (if has_toppings) → add_to_cart → checkout_preview → confirm with user → place_order → track_orders",
+    "",
+    "store_type: Some stores (e.g. turbo) are internally mapped to 'restaurant'. Tools that accept store_type auto-resolve this — just pass the store_type from search results or get_cart, no manual mapping needed.",
+    "",
+    "IMPORTANT: Always confirm with the user before calling place_order or set_address.",
+  ].join("\n"),
 });
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
@@ -63,7 +72,7 @@ server.tool("list_addresses", "List all saved delivery addresses", {}, async () 
 
 server.tool(
   "set_address",
-  "Set the active delivery address by ID",
+  "Set the active delivery address by ID. Always confirm with the user before changing.",
   { address_id: z.number().describe("Address ID from list_addresses") },
   async ({ address_id }) => {
     const config = await loadConfig();
@@ -81,7 +90,7 @@ server.tool(
 
 server.tool(
   "search",
-  "Search for products and stores on Rappi",
+  "Search for products and stores. Returns store_id, store_type, product_id, price, and has_toppings. If has_toppings is true, call get_product_options before add_to_cart.",
   { query: z.string().describe("What to search for (e.g. 'hamburguesa', 'pizza')") },
   async ({ query }) => {
     const config = await loadConfig();
@@ -174,7 +183,7 @@ server.tool(
 
 server.tool(
   "add_to_cart",
-  "Add a product to the shopping cart. Search first to get the price.",
+  "Add a product to cart. Always search first to get the correct price. If the product has required toppings, call get_product_options first and include topping IDs.",
   {
     store_id: z.number().describe("Store ID"),
     product_id: z.string().describe("Product ID"),
@@ -227,7 +236,7 @@ server.tool(
   }
 );
 
-server.tool("get_cart", "View current shopping cart", {}, async () => {
+server.tool("get_cart", "View current shopping cart. Returns store_type and store_type_origin for each cart — use store_type when calling checkout/tip/order tools (auto-resolved).", {}, async () => {
   const config = await loadConfig();
   const carts = await getCarts(config);
   if (!carts.length) return { content: [{ type: "text", text: "Cart is empty" }] };
@@ -238,8 +247,8 @@ server.tool("get_cart", "View current shopping cart", {}, async () => {
 
 server.tool(
   "checkout_preview",
-  "Preview the order with price breakdown before placing",
-  { store_type: z.string().optional().default(DEFAULT_STORE_TYPE) },
+  "Preview the order with full price breakdown. Always call this before place_order and show the summary to the user. store_type auto-resolves (e.g. turbo → restaurant).",
+  { store_type: z.string().optional().default(DEFAULT_STORE_TYPE).describe("Store type from get_cart (auto-resolves turbo → restaurant)") },
   async ({ store_type }) => {
     const config = await loadConfig();
     const resolved = await resolveStoreType(store_type, config);
@@ -261,10 +270,10 @@ server.tool(
 
 server.tool(
   "set_tip",
-  "Set tip amount for delivery",
+  "Set tip amount for the delivery driver. store_type auto-resolves (e.g. turbo → restaurant).",
   {
     amount: z.number().describe("Tip in COP (e.g. 2000) or 0 to remove"),
-    store_type: z.string().optional().default(DEFAULT_STORE_TYPE),
+    store_type: z.string().optional().default(DEFAULT_STORE_TYPE).describe("Store type from get_cart (auto-resolves turbo → restaurant)"),
   },
   async ({ amount, store_type }) => {
     const config = await loadConfig();
@@ -280,8 +289,8 @@ server.tool(
 
 server.tool(
   "place_order",
-  "Place the order. ALWAYS show checkout_preview first and get user confirmation.",
-  { store_type: z.string().optional().default(DEFAULT_STORE_TYPE) },
+  "Place the order. ALWAYS call checkout_preview first and get explicit user confirmation before calling this. store_type auto-resolves (e.g. turbo → restaurant).",
+  { store_type: z.string().optional().default(DEFAULT_STORE_TYPE).describe("Store type from get_cart (auto-resolves turbo → restaurant)") },
   async ({ store_type }) => {
     const config = await loadConfig();
     const resolved = await resolveStoreType(store_type, config);

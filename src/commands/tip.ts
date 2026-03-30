@@ -1,4 +1,5 @@
 import { loadConfig } from "../config";
+import { resolveStoreType } from "../services/cart";
 import { setTip } from "../services/checkout";
 import { withSpinner, ok, bold } from "../ui";
 
@@ -13,7 +14,8 @@ if (!tipArg) {
 
 const tip = parseInt(tipArg);
 const config = await loadConfig();
-await withSpinner("Setting tip...", () => setTip(storeType, tip, config));
+const resolved = await resolveStoreType(storeType, config);
+await withSpinner("Setting tip...", () => setTip(resolved, tip, config));
 
 if (tip > 0) {
   console.log(`\n${ok(`Tip set to ${bold(`$${tip.toLocaleString("es-CO")}`)}`)}\n`);

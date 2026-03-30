@@ -9,7 +9,7 @@ import { getAddresses, setActiveAddress, reverseGeocode } from "../services/addr
 import { search } from "../services/search";
 import { getStoreDetail, getRestaurantCatalog } from "../services/store";
 import { getProductToppings } from "../services/product";
-import { addToCart, removeFromCart, getCarts, recalculateCart } from "../services/cart";
+import { addToCart, removeFromCart, getCarts, recalculateCart, resolveStoreType } from "../services/cart";
 import { getCheckoutDetail, setTip } from "../services/checkout";
 import { placeOrder, getOrders } from "../services/order";
 import { DEFAULT_STORE_TYPE } from "../constants";
@@ -242,9 +242,10 @@ server.tool(
   { store_type: z.string().optional().default(DEFAULT_STORE_TYPE) },
   async ({ store_type }) => {
     const config = await loadConfig();
+    const resolved = await resolveStoreType(store_type, config);
     const [cart, detail] = await Promise.allSettled([
-      recalculateCart(store_type, config),
-      getCheckoutDetail(store_type, config),
+      recalculateCart(resolved, config),
+      getCheckoutDetail(resolved, config),
     ]);
     return {
       content: [{
@@ -267,7 +268,8 @@ server.tool(
   },
   async ({ amount, store_type }) => {
     const config = await loadConfig();
-    await setTip(store_type, amount, config);
+    const resolved = await resolveStoreType(store_type, config);
+    await setTip(resolved, amount, config);
     return {
       content: [{ type: "text", text: amount > 0 ? `Tip set to $${amount.toLocaleString("es-CO")}` : "Tip removed" }],
     };
@@ -282,7 +284,8 @@ server.tool(
   { store_type: z.string().optional().default(DEFAULT_STORE_TYPE) },
   async ({ store_type }) => {
     const config = await loadConfig();
-    const result = await placeOrder(store_type, config);
+    const resolved = await resolveStoreType(store_type, config);
+    const result = await placeOrder(resolved, config);
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   }
 );

@@ -81,6 +81,7 @@ export const CartResponseSchema = z
   .object({
     id: z.string(),
     store_type: z.string(),
+    store_type_origin: z.string().optional(),
     stores: z.array(CartStoreResponseSchema),
     product_total: z.number(),
     shipping_total: z.number(),

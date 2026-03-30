@@ -55,6 +55,15 @@ export async function getCarts(config: RappiConfig): Promise<CartResponse[]> {
   );
 }
 
+export async function resolveStoreType(
+  storeType: string,
+  config: RappiConfig
+): Promise<string> {
+  const carts = await getCarts(config);
+  const cart = carts.find((c) => c.store_type === storeType);
+  return cart?.store_type_origin || storeType;
+}
+
 export async function removeFromCart(
   storeType: string,
   productId: string,

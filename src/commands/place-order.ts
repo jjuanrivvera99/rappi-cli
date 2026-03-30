@@ -1,12 +1,13 @@
 import { loadConfig } from "../config";
-import { recalculateCart } from "../services/cart";
+import { recalculateCart, resolveStoreType } from "../services/cart";
 import { placeOrder } from "../services/order";
 import { withSpinner, ok, fail, rappiOrangeBold, dim, bold, warn } from "../ui";
 
 const storeType = process.argv[2] || "restaurant";
 const config = await loadConfig();
+const resolved = await resolveStoreType(storeType, config);
 
-const cart = await withSpinner("Validating cart...", () => recalculateCart(storeType, config));
+const cart = await withSpinner("Validating cart...", () => recalculateCart(resolved, config));
 if (!cart.stores?.length) {
   console.log(`\n${fail("Cart is empty.")}\n`);
   process.exit(1);
@@ -33,7 +34,7 @@ for (const store of cart.stores) {
 }
 
 try {
-  const result = await withSpinner("Placing order...", () => placeOrder(storeType, config));
+  const result = await withSpinner("Placing order...", () => placeOrder(resolved, config));
   console.log(`\n${ok("Order placed!")}`);
   console.log(`\n  ${dim(JSON.stringify(result, null, 2))}\n`);
 } catch (err: any) {

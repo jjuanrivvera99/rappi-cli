@@ -1,19 +1,20 @@
 import { loadConfig } from "../config";
-import { recalculateCart } from "../services/cart";
+import { recalculateCart, resolveStoreType } from "../services/cart";
 import { getCheckoutDetail, getCheckoutWidgets, setTip } from "../services/checkout";
 import { printTable, withSpinner, rappiOrangeBold, dim, bold, success, warn, hint } from "../ui";
 
 const storeType = process.argv[2] || "restaurant";
 const tipArg = process.argv[3];
 const config = await loadConfig();
+const resolved = await resolveStoreType(storeType, config);
 
 if (tipArg !== undefined) {
   const tip = parseInt(tipArg);
-  await setTip(storeType, tip, config);
+  await setTip(resolved, tip, config);
   console.log(tip > 0 ? `\n  ${success("\u2713")} Tip set to ${bold(`$${tip.toLocaleString("es-CO")}`)}` : `\n  ${success("\u2713")} Tip removed`);
 }
 
-const cart = await withSpinner("Preparing checkout...", () => recalculateCart(storeType, config));
+const cart = await withSpinner("Preparing checkout...", () => recalculateCart(resolved, config));
 
 if (!cart.stores?.length) {
   console.log("\n  Cart is empty. Add items first.\n");
@@ -50,7 +51,7 @@ for (const store of cart.stores) {
 
 // Order summary
 try {
-  const detail = await withSpinner("Loading summary...", () => getCheckoutDetail(storeType, config));
+  const detail = await withSpinner("Loading summary...", () => getCheckoutDetail(resolved, config));
   if (detail.summary?.length) {
     console.log(`  ${rappiOrangeBold("Order Summary")}\n`);
     for (const section of detail.summary) {
@@ -72,7 +73,7 @@ try {
 
 // Checkout steps
 try {
-  const widgets = await getCheckoutWidgets(storeType, config);
+  const widgets = await getCheckoutWidgets(resolved, config);
   const types = widgets.map((w) => w.component_type);
   console.log(`\n  ${dim("Steps:")} ${types.join(` ${dim("\u2192")} `)}`);
 } catch {}

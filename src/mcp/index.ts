@@ -300,3 +300,4 @@ server.tool("track_orders", "Track active and cancelled orders", {}, async () =>
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
+console.error("[rappi-mcp] server running — 14 tools available");
